@@ -9,7 +9,7 @@ import retrofit2.http.Url;
 
 public interface PokemonService
 {
-    @GET("pokemon?limit=256")
+    @GET("pokemon?limit=150")
     Call<PokeList> listPokemons();
 
     @GET("pokemon/{pokemon_id}/")

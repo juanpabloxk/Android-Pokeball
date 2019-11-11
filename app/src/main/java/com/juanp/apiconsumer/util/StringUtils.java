@@ -10,4 +10,11 @@ public class StringUtils
         return Arrays.toString(list.toArray())
                 .replaceAll("\\[|\\]","");
     }
+
+    public static String getIntroSeparatedString(List list)
+    {
+        return Arrays.toString(list.toArray())
+                .replaceAll(",","\n")
+                .replaceAll("\\[|\\]","");
+    }
 }

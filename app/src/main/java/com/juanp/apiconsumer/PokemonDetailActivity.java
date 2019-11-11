@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static com.juanp.apiconsumer.util.ResolutionUtils.dpToPx;
 import static com.juanp.apiconsumer.util.StringUtils.getCommaSeparatedString;
+import static com.juanp.apiconsumer.util.StringUtils.getIntroSeparatedString;
 
 public class PokemonDetailActivity extends AppCompatActivity
 {
@@ -28,7 +29,6 @@ public class PokemonDetailActivity extends AppCompatActivity
     private ImageView iv_image;
     private Picasso picasso;
     private int pokeImgWidth,pokeImgHeight;
-    private TableLayout tableLayout;
     private LinearLayout scrollViewLayout;
 
     @Override
@@ -133,11 +133,9 @@ public class PokemonDetailActivity extends AppCompatActivity
             View row = getLayoutInflater().inflate(R.layout.detail_row_item,scrollViewLayout,false);
             TextView titleColumn = row.findViewById(R.id.columnTitle);
             TextView contentColumn = row.findViewById(R.id.columnContent);
-
-
             titleColumn.setText(k);
-            contentColumn.setText(getCommaSeparatedString(v));
-
+            if(k.equals("Moves:")) {contentColumn.setText(getCommaSeparatedString(v));}
+            else {contentColumn.setText(getIntroSeparatedString(v));}
             scrollViewLayout.addView(row);
         });
 

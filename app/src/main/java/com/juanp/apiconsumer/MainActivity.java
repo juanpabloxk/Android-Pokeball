@@ -7,6 +7,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +36,17 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        Drawable drawable = getDrawable(R.mipmap.ic_pokeball_foreground);
+        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+        Drawable newIcon = new BitmapDrawable(getResources(),
+                Bitmap.createScaledBitmap(bitmap, 80, 80, true));
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(newIcon);
+        getSupportActionBar().setTitle("  Pokemons List");
+
+
         configureRecyclerView();
         pokeObtainer = new PokeListObtainer(getString(R.string.api_url));
         pokeObtainer.obtain(new PokeListObtainer.OnPokeListObtained()
@@ -115,8 +129,8 @@ public class MainActivity extends AppCompatActivity
     private void addName()
     {
         rvPokeAdapter.getList().add(new Item("TestPokemon",""));
-        rvPokeAdapter.notifyItemInserted(objectList.size());
-        layoutManager.scrollToPosition(objectList.size()-1);
+        rvPokeAdapter.notifyItemInserted(this.rvPokeAdapter.getItemCount());
+        layoutManager.scrollToPosition(this.rvPokeAdapter.getItemCount()-1);
     }
 }
 
