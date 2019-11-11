@@ -1,50 +1,122 @@
 package com.juanp.apiconsumer;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.juanp.apiconsumer.models.pokemon.Item;
+import com.juanp.apiconsumer.pokeapi.PokeList;
+import com.juanp.apiconsumer.pokeapi.PokeListObtainer;
+import com.juanp.apiconsumer.ui.RVPokeAdapter;
+
+import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+{
+    private List<String> objectList;
+    private RecyclerView recyclerView;
+    private RVPokeAdapter rvPokeAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+    private PokeListObtainer pokeObtainer;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        final TextView tv = findViewById(R.id.textView);
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://api.github.com/")
-                .build();
-
-        GitHubService service = retrofit.create(GitHubService.class);
-        Call<List<Repo>> repos = service.listRepos("xKript");
-        repos.enqueue(new Callback<List<Repo>>() {
-            @Override
-            public void onResponse(Call<List<Repo>> call, Response<List<Repo>> response) {
-                for (Repo r : response.body())
+        configureRecyclerView();
+        pokeObtainer = new PokeListObtainer(getString(R.string.api_url));
+        pokeObtainer.obtain(new PokeListObtainer.OnPokeListObtained()
+            {
+                @Override
+                public void call(String statusMessage, PokeList pokeList)
                 {
-                    tv.setText(tv.getText()+"\n"+r.name);
+                    if(!statusMessage.equals(PokeListObtainer.SUCCESS))
+                    {
+                        Toast.makeText(MainActivity.this,
+                                "Error getting pokemons: "+statusMessage,
+                                Toast.LENGTH_LONG).show();
+
+                        return;
+                    }
+
+                    Toast.makeText(MainActivity.this,
+                            "Pokemons obtained: "+pokeList.getList().size(),
+                            Toast.LENGTH_LONG).show();
+
+                    rvPokeAdapter.setList(pokeList.getList());
+                    rvPokeAdapter.notifyDataSetChanged();
                 }
             }
+        );
+    }
 
-            @Override
-            public void onFailure(Call<List<Repo>> call, Throwable t) {
-                tv.setText("Error getting things: "+t.getMessage());
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case R.id.addItem:
+            {
+                this.addName();
+                return true;
             }
-        });
+            default:
+            {
+                return super.onOptionsItemSelected(item);
+            }
+        }
+    }
+
+    private void configureRecyclerView()
+    {
+        final String strNotLoaded = getString(R.string.pokemons_not_loaded);
+        objectList = new ArrayList<String>(){{add(strNotLoaded);}};
+
+        recyclerView = findViewById(R.id.recyclerView);
+        layoutManager = new LinearLayoutManager(this);
+
+        rvPokeAdapter = new RVPokeAdapter(null,
+            R.layout.recycler_view_item,
+            new RVPokeAdapter.OnPokemonClickListener()
+            {
+                @Override
+                public void call(String name, int position)
+                {
+                    Intent intent = new Intent(MainActivity.this,PokemonDetailActivity.class);
+                    intent.putExtra("pokeurl",name);
+                    startActivity(intent);
+                }
+            }
+        );
+
+        recyclerView.setAdapter(rvPokeAdapter);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    private void addName()
+    {
+        rvPokeAdapter.getList().add(new Item("TestPokemon",""));
+        rvPokeAdapter.notifyItemInserted(objectList.size());
+        layoutManager.scrollToPosition(objectList.size()-1);
     }
 }
 
