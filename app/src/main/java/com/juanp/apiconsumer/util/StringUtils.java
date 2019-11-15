@@ -14,7 +14,7 @@ public class StringUtils
     public static String getIntroSeparatedString(List list)
     {
         return Arrays.toString(list.toArray())
-                .replaceAll(",","\n")
+                .replaceAll(",\\s?","\n")
                 .replaceAll("\\[|\\]","");
     }
 }
